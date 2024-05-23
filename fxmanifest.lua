@@ -3,7 +3,7 @@ game 'gta5'
 lua54 'yes'
 
 author 'Dev Matheus Peluso'
-description ''
+description 'Emprego entregador de pizza'
 version '1.0.0'
 
 client_scripts {

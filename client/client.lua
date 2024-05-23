@@ -16,15 +16,37 @@ Citizen.CreateThread(function()
         local sleep = 1000
         local ped = PlayerPedId()
         local playerPos = GetEntityCoords(ped)
-        local makerPos = vector3(144.18, -1462.18, 29.15-1)
+        local makerPos = vector3(144.18, -1462.18, 29.15)
 
         local distancia  = #(playerPos - makerPos)
         if distancia < 7 then
             sleep = 5
-            DrawMarker(27, makerPos.x, makerPos.y, makerPos.z, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.2, 1.2, 1.2, 255, 255, 255, 255, false, false, 2, true, nil, nil, nil)
-        end
-        
+            Work:DrawText3D(makerPos.x, makerPos.y, makerPos.z+0.5,'PRESSIONE [E] PARA ENTRAR EM SERVIÇO!')
+            DrawMarker(27, makerPos.x, makerPos.y, makerPos.z-1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.2, 1.2, 1.2, 255, 255, 255, 255, false, false, 2, true, nil, nil, nil)
+        end  
         Wait(sleep)
     end
-
 end)
+
+function Work:DrawText3D(x,y,z,txt) -- para poder trabalhar dessa forma é necessario estár usando o lua54 'yes' no fxmanifest.lua
+    
+    if txt == '' then
+        return 
+    end
+
+    local onScreen, x2D, y2D = World3dToScreen2d(x,y,z)
+
+    if onScreen then
+        SetTextScale(0.5, 0.5)
+        SetTextFont(4)
+        SetTextProportional(true)
+        SetTextColour(255,255,255,255)
+        SetTextEntry('STRING')
+        SetTextCentre(true)
+        AddTextComponentString(txt)
+        DrawText(x2D,y2D)
+    end
+
+
+    
+end
