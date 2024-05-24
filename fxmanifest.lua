@@ -2,7 +2,7 @@ fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
 
-author 'Dev Matheus Peluso'
+author 'Dev Matheus Peluso do Nascimento'
 description 'Emprego entregador de pizza'
 version '1.0.0'
 
