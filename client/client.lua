@@ -19,14 +19,34 @@ Citizen.CreateThread(function()
         local makerPos = vector3(144.18, -1462.18, 29.15)
 
         local distancia  = #(playerPos - makerPos)
-        if distancia < 7 then
+        if not Work.inService and distancia < 7 then
             sleep = 5
-            Work:DrawText3D(makerPos.x, makerPos.y, makerPos.z+0.5,'PRESSIONE [E] PARA ENTRAR EM SERVIÇO!')
+            Work:DrawText3D(makerPos.x, makerPos.y, makerPos.z+0.5,'PRESSIONE ~g~[E] ~w~PARA ENTRAR EM SERVIÇO!')
             DrawMarker(27, makerPos.x, makerPos.y, makerPos.z-1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.2, 1.2, 1.2, 255, 255, 255, 255, false, false, 2, true, nil, nil, nil)
+            if IsControlJustPressed(0, 38)then
+                Work.inService = true -- criando variavel para entrar em serviço
+                Work:spawVehicle()
+            end
         end  
         Wait(sleep)
     end
 end)
+
+-- criando veiculo
+function Work:spawVehicle()
+    local hash = GetHashKey('akuma')
+    RequestModel(hash); -- requisitando veiculo
+
+    while not HasModelLoaded(hash)do -- enquanto o veiculo não for carregado , esperar 100 milessegundos
+        Citizen.Wait(100)
+    end
+
+    -- guardar a informação do veiculo para que depois consiga excluir o mesmo
+    Work.vehicle = CreateVehicle(hash, 154.71, -1448.28, 29.15, 141.96, true, true) --native createVehicle alem de criar , retorna o identificador do mesmo
+    SetVehicleNumberPlateText(Work.vehicle, vRP.getRegistrationNumber()) -- função da vrp que gerar a nossa placa na qual nosso o player se torna dono da placa
+
+
+end
 
 function Work:DrawText3D(x,y,z,txt) -- para poder trabalhar dessa forma é necessario estár usando o lua54 'yes' no fxmanifest.lua
     
