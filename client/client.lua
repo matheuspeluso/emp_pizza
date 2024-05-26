@@ -42,6 +42,9 @@ Citizen.CreateThread(function()
                 if #Work.pizzaInVehicle < 10 then
                     local text = Work.pizzaInHand and 'COLOQUE A PIZZA NA MOTO' or 'PRESSIONE ~g~[E] ~w~PARA PEGAR UMA PIZZA';
                     Work:DrawText3D(makerPos.x, makerPos.y, makerPos.z+0.5,text)
+                    if not Work.pizzaInHand and IsControlJustPressed(0,38) then
+                        Work:takePizzaHand()
+                    end
                 end
             end
         end
@@ -49,6 +52,23 @@ Citizen.CreateThread(function()
         Wait(sleep)
     end
 end)
+
+-- função pizza na mão
+
+function Work:takePizzaHand()
+    self.pizzaInHand = true -- self.pizaInHand = Work.pizzaInHand
+    --self acessa tudo que esta dentro de work  ou seja ele mesmo
+
+    --animação da pizza na mão
+    local dict  = 'anim@heists@box_carry@'
+    RequestAnimDict(dict)
+    while not HasAnimDictLoaded(dict) do
+        Citizen.Wait(100)
+    end
+    TaskPlayAnim(PlayerPedId(),dict, 'idle', 8.0, 8.0, -1, 49, -1, true, false, false)
+    self.currentPizzaInHand = CreateObject(GetHashKey('prop_pizza_box_02'), 0, 0, 0, true, true, true)
+    AttachEntityToEntity(self.currentPizzaInHand, PlayerPedId(), GetPedBoneIndex(PlayerPedId(), 28422), 0.0, -0.2, -0.15, 0.0, 0.0, 0.0, 0.0, false, false, false, false, true)
+end
 
 -- criando veiculo
 function Work:spawVehicle()
