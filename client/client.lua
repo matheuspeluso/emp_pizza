@@ -7,7 +7,9 @@ Proxy = module('vrp','lib/Proxy')
 vRP = Proxy.getInterface('vRP'); -- feito isso já podemos usar as funções do client da framework
 
 -- criando uma tabela 
-Work = {}
+Work = {
+    pizzaInVehicle = {},
+}
 
 Remote = Tunnel.getInterface(GetCurrentResourceName()) -- tudo que estiver em work eu vou poder acessar no meu client
 
@@ -19,15 +21,31 @@ Citizen.CreateThread(function()
         local makerPos = vector3(144.18, -1462.18, 29.15)
 
         local distancia  = #(playerPos - makerPos)
-        if not Work.inService and distancia < 7 then
-            sleep = 5
-            Work:DrawText3D(makerPos.x, makerPos.y, makerPos.z+0.5,'PRESSIONE ~g~[E] ~w~PARA ENTRAR EM SERVIÇO!')
-            DrawMarker(27, makerPos.x, makerPos.y, makerPos.z-1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.2, 1.2, 1.2, 255, 255, 255, 255, false, false, 2, true, nil, nil, nil)
-            if IsControlJustPressed(0, 38)then
-                Work.inService = true -- criando variavel para entrar em serviço
-                Work:spawVehicle()
+        
+        if distancia < 7 then
+            if not Work.inService then
+                
+                sleep = 5
+                Work:DrawText3D(makerPos.x, makerPos.y, makerPos.z+0.5,'PRESSIONE ~g~[E] ~w~PARA ENTRAR EM SERVIÇO!')
+                DrawMarker(27, makerPos.x, makerPos.y, makerPos.z-1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.2, 1.2, 1.2, 255, 255, 255, 255, false, false, 2, true, nil, nil, nil)
+                if IsControlJustPressed(0, 38)then
+                    Work.inService = true -- criando variavel para entrar em serviço
+                    Work:spawVehicle()
+                end
+                
+            else
+                --[[
+                    colcoar # na frente de tabela na qual so contenha valores sem chaves ,
+                    retorna-se a quantidade de itens que tem na tabale
+                    ]] 
+                sleep = 5
+                if #Work.pizzaInVehicle < 10 then
+                    local text = Work.pizzaInHand and 'COLOQUE A PIZZA NA MOTO' or 'PRESSIONE ~g~[E] ~w~PARA PEGAR UMA PIZZA';
+                    Work:DrawText3D(makerPos.x, makerPos.y, makerPos.z+0.5,text)
+                end
             end
-        end  
+        end
+    
         Wait(sleep)
     end
 end)
@@ -67,6 +85,5 @@ function Work:DrawText3D(x,y,z,txt) -- para poder trabalhar dessa forma é neces
         DrawText(x2D,y2D)
     end
 
-
-    
+ 
 end
