@@ -53,8 +53,54 @@ Citizen.CreateThread(function()
     end
 end)
 
--- função pizza na mão
+-- criando veiculo
+function Work:spawVehicle()
+    local hash = GetHashKey('akuma')
+    RequestModel(hash); -- requisitando veiculo
 
+    while not HasModelLoaded(hash)do -- enquanto o veiculo não for carregado , esperar 100 milessegundos
+        Citizen.Wait(100)
+    end
+
+    -- guardar a informação do veiculo para que depois consiga excluir o mesmo
+    Work.vehicle = CreateVehicle(hash, 154.71, -1448.28, 29.15, 141.96, true, true) --native createVehicle alem de criar , retorna o identificador do mesmo
+    SetVehicleNumberPlateText(Work.vehicle, vRP.getRegistrationNumber()) -- função da vrp que gerar a nossa placa na qual nosso o player se torna dono da placa
+
+    Citizen.CreateThread(function () 
+        -- ao criar uma thread , ele executa todo o while mas sem atrapalhar o retante do
+        -- codigo / e desta forma não travando o codigo no while infinitamente
+        while self.inService do
+            local sleep = 1000
+
+            local ped = PlayerPedId()
+            if not IsPedInAnyVehicle(ped, false)then
+                local playerPos = GetEntityCoords(ped)
+                local distance = #(playerPos - GetEntityCoords(self.vehicle)) < 2
+                if distance then
+                    sleep = 0
+                    local havePizzaInVeh = #self.pizzaInVehicle > 0 and 'PRESSIONE ~y~[G] ~w~PARA ~y~RETIRAR ~w~A PIZZA DA MOTO' or ''
+                    local text = self.pizzaInHand and 'PRESSIONE ~g~[G] ~w~PARA ~g~COLOCAR ~w~A PIZZA NA MOTO' or havePizzaInVeh
+                    self:DrawText3D(playerPos.x,playerPos.y,playerPos.z,text)
+                    if IsControlJustPressed(0, 58) then
+                        if self.pizzaInHand then
+                            self:removePizzaInHand()
+                            self:putPizzaInVehicle()
+                        elseif #self.pizzaInVehicle > 0 then
+                            self:removePizzaFromVehicle() -- removendo a pizza do veiculo
+                            Work:takePizzaHand() -- pegando novamente ela na mão
+                        end
+                        
+                    end
+                end
+            end
+            Citizen.Wait(sleep)
+
+        end
+    end)
+
+end
+
+--função pegar pizza na mão
 function Work:takePizzaHand()
     self.pizzaInHand = true -- self.pizaInHand = Work.pizzaInHand
     --self acessa tudo que esta dentro de work  ou seja ele mesmo
@@ -70,19 +116,27 @@ function Work:takePizzaHand()
     AttachEntityToEntity(self.currentPizzaInHand, PlayerPedId(), GetPedBoneIndex(PlayerPedId(), 28422), 0.0, -0.2, -0.15, 0.0, 0.0, 0.0, 0.0, false, false, false, false, true)
 end
 
--- criando veiculo
-function Work:spawVehicle()
-    local hash = GetHashKey('akuma')
-    RequestModel(hash); -- requisitando veiculo
+--função remover pizza do veiculo
+function Work:removePizzaFromVehicle()
+    DeleteEntity(self.pizzaInVehicle[#self.pizzaInVehicle]) -- deletando o ultimo objeto
+    -- passando o # ele retorna a quantidade de items da tabela e eu removo esse ultimo objeto
+    self.pizzaInVehicle[#self.pizzaInVehicle] = nil -- removendo o ultimo objeto da tabela
+end
 
-    while not HasModelLoaded(hash)do -- enquanto o veiculo não for carregado , esperar 100 milessegundos
-        Citizen.Wait(100)
-    end
+--função colocar pizza no veiculo
+function Work:putPizzaInVehicle()
+    local pizza = CreateObject(GetHashKey('prop_pizza_box_02'), 0, 0, 0, true, true, true)
+    local height = #self.pizzaInVehicle * 0.05
+    AttachEntityToEntity(pizza, self.vehicle, GetEntityBoneIndexByName(self.vehicle, 'bodyshell'), 0.0, -0.8, 0.4 + height, 0.0, 0.0 , 0.0, false, true, false, false, 1, true)
+    table.insert(self.pizzaInVehicle,pizza) -- a partir conseguimos saber quantas pizza temos em nosso veiculo
+end
 
-    -- guardar a informação do veiculo para que depois consiga excluir o mesmo
-    Work.vehicle = CreateVehicle(hash, 154.71, -1448.28, 29.15, 141.96, true, true) --native createVehicle alem de criar , retorna o identificador do mesmo
-    SetVehicleNumberPlateText(Work.vehicle, vRP.getRegistrationNumber()) -- função da vrp que gerar a nossa placa na qual nosso o player se torna dono da placa
-
+-- função remover pizza da mão
+function Work:removePizzaInHand()
+    self.pizzaInHand = false -- setando que não tem pizza mais na mão do player
+    ClearPedTasks(PlayerPedId()) -- limpando a animação de segurar a pizza 
+    DeleteEntity(self.currentPizzaInHand) -- deletando o objeto da pizza
+    self.currentPizzaInHand = false --limpando a pizza
 
 end
 
