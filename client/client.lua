@@ -9,6 +9,12 @@ vRP = Proxy.getInterface('vRP'); -- feito isso já podemos usar as funções do 
 -- criando uma tabela 
 Work = {
     pizzaInVehicle = {},
+    routes = {
+        {-1366.07, 56.52, 54.1},
+        {-1047.89, 312.96, 67.01},
+        {-958.13, 607.02, 106.3},
+        {-772.74, 313.0, 85.7},
+    }
 }
 
 Remote = Tunnel.getInterface(GetCurrentResourceName()) -- tudo que estiver em work eu vou poder acessar no meu client
@@ -31,6 +37,7 @@ Citizen.CreateThread(function()
                 if IsControlJustPressed(0, 38)then
                     Work.inService = true -- criando variavel para entrar em serviço
                     Work:spawVehicle()
+                    Work:createRoutes() --criando rotas
                 end
                 
             else
@@ -97,6 +104,21 @@ function Work:spawVehicle()
 
         end
     end)
+
+end
+
+--função rotas]
+function Work:createRoutes()
+    self.currentRoute = self.routes[math.random(1,#self.routes)]
+    self.currentBlip = AddBlipForCoord(self.currentRoute[1],self.currentRoute[2],self.currentRoute[3])
+    SetBlipSprite(self.currentBlip, 162)
+    SetBlipColour(self.currentBlip, 5)
+    SetBlipScale(self.currentBlip, 0.5)
+    SetBlipAsShortRange(self.currentBlip, false)--mudar
+    SetBlipRoute(self.currentBlip, true) -- cria o caminho ate o blip
+    BeginTextCommandSetBlipName("STRING")
+    AddTextComponentString('Entregar Pizza')
+    EndTextCommandSetBlipName(self.currentBlip)
 
 end
 
