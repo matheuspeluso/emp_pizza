@@ -36,8 +36,9 @@ Citizen.CreateThread(function()
                 DrawMarker(27, makerPos.x, makerPos.y, makerPos.z-1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.2, 1.2, 1.2, 255, 255, 255, 255, false, false, 2, true, nil, nil, nil)
                 if IsControlJustPressed(0, 38)then
                     Work.inService = true -- criando variavel para entrar em serviço
+                    TriggerEvent('Notify','aviso','Você entrou em serviço. Pegue seu veiculo de trabalho no estacionamento!',3000)
                     Work:spawVehicle()
-                    Work:createRoutes() --criando rotas    
+                    Work:createRoutes() --criando rotas
                 end
                 
             else
@@ -207,6 +208,7 @@ end
 
 RegisterCommand('pararpizza', function ()
 
+    TriggerEvent('Notify','aviso','Você saiu do serviço!',3000)
     --verficando se está em serviço
     if not Work.inService then
         return
@@ -239,6 +241,5 @@ RegisterCommand('pararpizza', function ()
     Work.currentPizzaInHand = nil
     Work.pizzaInVehicle = {}
     ClearPedTasks(PlayerPedId())
-
-
+    
 end)
