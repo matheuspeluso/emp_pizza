@@ -203,6 +203,42 @@ function Work:DrawText3D(x,y,z,txt) -- para poder trabalhar dessa forma é neces
         AddTextComponentString(txt)
         DrawText(x2D,y2D)
     end
-
- 
 end
+
+RegisterCommand('pararpizza', function ()
+
+    --verficando se está em serviço
+    if not Work.inService then
+        return
+    end
+
+    -- verificando se tem blip e removendo caso tenha 
+    if Work.currentBlip then
+        RemoveBlip(Work.currentBlip)
+    end
+
+    -- verificando se tem carro e removendo caso tenha 
+    if Work.vehicle then
+        DeleteEntity(Work.vehicle)
+    end
+
+    if Work.currentPizzaInHand then
+        DeleteEntity(Work.currentPizzaInHand)
+    end
+
+    if #Work.pizzaInVehicle > 0 then
+        for key, value in pairs(Work.pizzaInVehicle) do
+            DeleteEntity(value)
+        end
+    end
+
+    Work.inService = nil
+    Work.vehicle = nil
+    Work.currentRoute = nil
+    Work.currentBlip = nil
+    Work.currentPizzaInHand = nil
+    Work.pizzaInVehicle = {}
+    ClearPedTasks(PlayerPedId())
+
+
+end)
