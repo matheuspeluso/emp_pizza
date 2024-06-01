@@ -37,7 +37,7 @@ Citizen.CreateThread(function()
                 if IsControlJustPressed(0, 38)then
                     Work.inService = true -- criando variavel para entrar em serviço
                     Work:spawVehicle()
-                    Work:createRoutes() --criando rotas
+                    Work:createRoutes() --criando rotas    
                 end
                 
             else
@@ -119,6 +119,29 @@ function Work:createRoutes()
     BeginTextCommandSetBlipName("STRING")
     AddTextComponentString('Entregar Pizza')
     EndTextCommandSetBlipName(self.currentBlip)
+
+    --criando sistema de entregas
+    Citizen.CreateThread(function ()
+        while self.inService do
+            local sleep = 1000
+            local playerPos = GetEntityCoords(PlayerPedId())
+            local distance =  #(playerPos - vec3(self.currentRoute[1],self.currentRoute[2],self.currentRoute[3])) -- convertendo as cordenadas para vector 3
+            if distance < 2 then
+                sleep = 0
+                local text = self.pizzaInHand and "PRESSIONE ~g~[E] ~w~PARA ENTREGAR A PIZZA" or "CADE MINHA PIZZA ???"
+                self:DrawText3D(self.currentRoute[1],self.currentRoute[2],self.currentRoute[3],text)
+                if self.pizzaInHand and IsControlJustPressed(0, 38)then
+                    self:removePizzaInHand()
+                    Remote:sendMoney()
+                    -- pelo Remote tunnel é possivel chamar uma função de pagamento que foi criada no server e chamar ela no cliente
+                    RemoveBlip(self.currentBlip)
+                    Work:createRoutes()
+                    break
+                end
+            end
+            Wait(sleep)
+        end
+    end)
 
 end
 
